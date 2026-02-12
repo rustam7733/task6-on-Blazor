@@ -1,0 +1,14 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+<h1>Lobby</h1>
+<button @onclick="CreateLobby">Создать лобби</button>
+
+@code {
+    [Inject] NavigationManager Nav { get; set; } = null!;
+
+    void CreateLobby()
+    {
+        Nav.NavigateTo("/game");
+    }
+}

@@ -1,0 +1,79 @@
+﻿@page "/game"
+@rendermode InteractiveServer
+
+<h1>Counter: Tic Tac Toe</h1>
+
+<div style="display:grid; grid-template-columns:repeat(3,100px); gap:5px;">
+    @for (int i = 0; i < 9; i++)
+    {
+        int index = i;
+        <button style="height:100px; font-size:30px;"
+                @onclick="() => game.Move(index)">
+            @game.GameBoard[index]
+        </button>
+    }
+</div>
+
+<p class="alert">Move: @game.CurrentPlayer</p>
+<p class="alert">Winner: @game.Winner</p>
+
+<button class="active" @onclick="game.Restart">Restart</button>
+
+@code {
+    private TicTacToe game = new();
+
+    private class TicTacToe
+    {
+        public string[] GameBoard { get; set; } = new string[9];
+        public string CurrentPlayer { get; set; } = "X";
+        private bool GameOver { get; set; } = false;
+        public string Winner { get; set; } = "";
+
+        private int[][] winPatterns = [
+            [0,1,2], [3,4,5],[6,7,8],
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]
+        ];
+
+        public void Move(int index)
+        {
+            if (!string.IsNullOrEmpty(GameBoard[index]) || GameOver)
+                return;
+
+            GameBoard[index] = CurrentPlayer;
+            CheckWinner();
+
+            if (!GameOver)
+                CurrentPlayer = CurrentPlayer == "X" ? "O" : "X";
+        }
+
+        private void CheckWinner()
+        {
+            foreach (var combo in winPatterns)
+            {
+                if (!string.IsNullOrEmpty(GameBoard[combo[0]])
+                    && GameBoard[combo[0]] == GameBoard[combo[1]]
+                    && GameBoard[combo[1]] == GameBoard[combo[2]])
+                {
+                    Winner = GameBoard[combo[0]];
+                    GameOver = true;
+                    return;
+                }
+            }
+
+            if (GameBoard.All(x => x != null))
+            {
+                Winner = "Draw";
+                GameOver = true;
+            }
+        }
+
+        public void Restart()
+        {
+            GameBoard = new string[9];
+            CurrentPlayer = "X";
+            GameOver = false;
+            Winner = "";
+        }
+    }
+}
