@@ -1,25 +1,27 @@
 # =========================
-# BUILD STAGE
+# BUILD
 # =========================
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # копируем solution
-COPY *.sln ./
+COPY "task6 BlazorApplication.sln" .
 
-# копируем проект
-COPY task6 BlazorApplication/*.csproj ./task6 BlazorApplication/
-RUN dotnet restore
+# копируем csproj
+COPY "task6 BlazorApplication/task6 BlazorApplication.csproj" "task6 BlazorApplication/"
 
-# копируем весь код
-COPY . ./
+# restore
+RUN dotnet restore "task6 BlazorApplication/task6 BlazorApplication.csproj"
+
+# копируем всё остальное
+COPY . .
 
 # publish
 RUN dotnet publish "task6 BlazorApplication/task6 BlazorApplication.csproj" -c Release -o /app/publish
 
 
 # =========================
-# RUNTIME STAGE
+# RUNTIME
 # =========================
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
