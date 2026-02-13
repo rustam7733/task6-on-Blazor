@@ -6,6 +6,7 @@ public class TicTacToe
     public string CurrentPlayer { get; set; } = "X";
     public bool GameOver { get; set; } = false;
     public string Winner { get; set; } = "";
+    public int[] WinningPattern { get; set; } = [];
 
     private readonly int[][] winPatterns =
     [
@@ -43,6 +44,7 @@ public class TicTacToe
                 GameBoard[combo[1]] == GameBoard[combo[2]])
             {
                 Winner = GameBoard[combo[0]];
+                WinningPattern = combo;
                 GameOver = true;
                 return;
             }
@@ -61,5 +63,6 @@ public class TicTacToe
         CurrentPlayer = "X";
         GameOver = false;
         Winner = "";
+        WinningPattern = [];
     }
 }

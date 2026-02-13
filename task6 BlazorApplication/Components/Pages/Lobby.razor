@@ -4,44 +4,103 @@
 @inject NavigationManager Nav
 @inject GameService GameService
 
-<h1>Lobby</h1>
+<div class="container mt-5">
 
-<button @onclick="CreateLobby">Создать лобби</button>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
 
-<button @onclick="ToggleJoinMenu">Присоединиться</button>
+            <div class="card shadow-lg">
+                <div class="card-body text-center">
+
+                    <h2 class="mb-4">
+                        <i class="bi bi-joystick"></i>
+                        Tic Tac Toe Lobby
+                    </h2>
+
+                    <div class="d-grid gap-3">
+
+                        <button class="btn btn-success btn-lg"
+                                @onclick="CreateLobby">
+                            <i class="bi bi-plus-circle"></i>
+                            Create game
+                        </button>
+
+                        <button class="btn btn-outline-primary btn-lg"
+                                @onclick="ToggleJoinMenu">
+                            <i class="bi bi-people"></i>
+                            Join
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 @if (showJoinMenu)
 {
-    <div style="
-            position:fixed;
-            top:50%;
-            left:50%;
-            transform:translate(-50%, -50%);
-            background:white;
-            border:1px solid gray;
-            padding:20px;
-            box-shadow:0 0 10px rgba(0,0,0,0.3);
-            min-width:300px;
-        ">
+    <div class="modal fade show d-block" tabindex="-1"
+         style="background:rgba(0,0,0,0.4);">
 
-        <h3>Игры в ожидании</h3>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
 
-        @if (waitingRooms.Count == 0)
-        {
-            <p>Нет доступных игр</p>
-        }
-        else
-        {
-            @foreach (var room in waitingRooms)
-            {
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                    <span>Комната: @room.Id[..6]</span>
-                    <button @onclick="() => JoinRoom(room.Id)">Войти</button>
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-hourglass-split"></i>
+                        Waiting
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            @onclick="ToggleJoinMenu"></button>
                 </div>
-            }
-        }
 
-        <button style="margin-top:15px;" @onclick="ToggleJoinMenu">Закрыть</button>
+                <div class="modal-body">
+
+                    @if (waitingRooms.Count == 0)
+                    {
+                        <p class="text-muted text-center">
+                            No games available
+                        </p>
+                    }
+                    else
+                    {
+                        <ul class="list-group">
+
+                            @foreach (var room in waitingRooms)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+
+                                    <span>
+                                        <i class="bi bi-controller"></i>
+                                        Room: <strong>@room.Id[..6]</strong>
+                                    </span>
+
+                                    <button class="btn btn-primary btn-sm"
+                                            @onclick="() => JoinRoom(room.Id)">
+                                        Enter
+                                    </button>
+
+                                </li>
+                            }
+
+                        </ul>
+                    }
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary"
+                            @onclick="ToggleJoinMenu">
+                        Close
+                    </button>
+                </div>
+
+            </div>
+        </div>
     </div>
 }
 

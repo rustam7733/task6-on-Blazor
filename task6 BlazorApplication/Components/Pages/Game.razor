@@ -5,44 +5,77 @@
 @inject GameService GameService
 @inject IJSRuntime JS
 
-<h1>Tic Tac Toe</h1>
-
 @if (room == null)
 {
     <p>Loading...</p>
 }
 else
 {
-    <div class="game-container">
+    <div class="container mt-5">
 
-        <div class="game-info">
-            Your role: <b>@myRole</b>
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+
+                <div class="card shadow-lg">
+                    <div class="card-body text-center">
+
+                        <h3 class="mb-3">
+                            <i class="bi bi-controller"></i> Tic Tac Toe
+                        </h3>
+
+                        <p class="text-muted">
+                            Role:
+                            <span class="badge bg-primary">@myRole</span>
+                        </p>
+
+                        <div class="board d-grid gap-2"
+                             style="grid-template-columns:repeat(3, 110px);">
+
+                            @for (int i = 0; i < 9; i++)
+                            {
+                                int index = i;
+
+                                <button class="btn btn-outline-dark
+                                        @(room.Game.GameBoard[index] == "X" ? "cell-x" : "")
+                                        @(room.Game.GameBoard[index] == "O" ? "cell-o" : "")
+                                        @(room.Game.WinningPattern.Contains(index) ? "btn-warning" : "")"
+                                        @onclick="() => room.Game.Move(index, myRole)">
+                                    @room.Game.GameBoard[index]
+                                </button>
+                            }
+                        </div>
+
+                        <div class="mt-4">
+
+                            <p class="mb-1">
+                                <i class="bi bi-arrow-repeat"></i>
+                                Move:
+                                <strong>@room.Game.CurrentPlayer</strong>
+                            </p>
+
+                            <p>
+                                <i class="bi bi-trophy"></i>
+                                Winner:
+                                <strong class="text-success">@room.Game.Winner</strong>
+                            </p>
+
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+
+                            <button class="btn btn-primary"
+                                    @onclick="room.Game.Restart">
+                                <i class="bi bi-arrow-clockwise"></i>
+                                Restart
+                            </button>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
         </div>
-
-        <div class="board">
-            @for (int i = 0; i < 9; i++)
-            {
-                int index = i;
-
-                <button class="cell"
-                        @onclick="() => room.Game.Move(index, myRole)">
-                    @room.Game.GameBoard[index]
-                </button>
-            }
-        </div>
-
-        <div class="game-info">
-            Move: <b>@room.Game.CurrentPlayer</b>
-        </div>
-
-        <div class="game-info">
-            Winner: <b>@room.Game.Winner</b>
-        </div>
-
-        <button class="main-button" @onclick="room.Game.Restart">
-            Restart game
-        </button>
-
     </div>
 }
 
