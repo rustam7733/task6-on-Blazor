@@ -8,6 +8,43 @@
 
 <button @onclick="CreateLobby">Создать лобби</button>
 
+<button @onclick="ToggleJoinMenu">Присоединиться</button>
+
+@if (showJoinMenu)
+{
+    <div style="
+            position:fixed;
+            top:50%;
+            left:50%;
+            transform:translate(-50%, -50%);
+            background:white;
+            border:1px solid gray;
+            padding:20px;
+            box-shadow:0 0 10px rgba(0,0,0,0.3);
+            min-width:300px;
+        ">
+
+        <h3>Игры в ожидании</h3>
+
+        @if (waitingRooms.Count == 0)
+        {
+            <p>Нет доступных игр</p>
+        }
+        else
+        {
+            @foreach (var room in waitingRooms)
+            {
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span>Комната: @room.Id[..6]</span>
+                    <button @onclick="() => JoinRoom(room.Id)">Войти</button>
+                </div>
+            }
+        }
+
+        <button style="margin-top:15px;" @onclick="ToggleJoinMenu">Закрыть</button>
+    </div>
+}
+
 @code {
     void CreateLobby()
     {
@@ -18,6 +55,43 @@
             Id = id
         };
 
+        Nav.NavigateTo("/game/" + id);
+    }
+
+    bool showJoinMenu = false;
+    List<GameRoom> waitingRooms = new();
+    System.Timers.Timer? timer;
+
+    void ToggleJoinMenu()
+    {
+        showJoinMenu = !showJoinMenu;
+
+        if (showJoinMenu)
+        {
+            LoadRooms();
+
+            timer = new System.Timers.Timer(500);
+            timer.Elapsed += (_, __) =>
+            {
+                LoadRooms();
+                InvokeAsync(StateHasChanged);
+            };
+            timer.Start();
+        }
+        else
+        {
+            timer?.Stop();
+            timer?.Dispose();
+        }
+    }
+
+    void LoadRooms()
+    {
+        waitingRooms = GameService.GetWaitingRooms();
+    }
+
+    void JoinRoom(string id)
+    {
         Nav.NavigateTo("/game/" + id);
     }
 }
