@@ -1,28 +1,14 @@
-# =========================
-# BUILD
-# =========================
+# ---------- BUILD ----------
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# копируем solution
-COPY "task6 BlazorApplication.sln" .
-
-# копируем csproj
-COPY "task6 BlazorApplication/task6 BlazorApplication.csproj" "task6 BlazorApplication/"
-
-# restore
-RUN dotnet restore "task6 BlazorApplication/task6 BlazorApplication.csproj"
-
-# копируем всё остальное
 COPY . .
+WORKDIR "/src/task6 BlazorApplication"
 
-# publish
-RUN dotnet publish "task6 BlazorApplication/task6 BlazorApplication.csproj" -c Release -o /app/publish
+RUN dotnet restore
+RUN dotnet publish -c Release -o /app/publish
 
-
-# =========================
-# RUNTIME
-# =========================
+# ---------- RUNTIME ----------
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 
