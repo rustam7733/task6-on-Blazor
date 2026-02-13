@@ -13,24 +13,37 @@
 }
 else
 {
-    <h3>Your role: @myRole</h3>
+    <div class="game-container">
 
-    <div style="display:grid; grid-template-columns:repeat(3,100px); gap:5px;">
-        @for (int i = 0; i < 9; i++)
-        {
-            int index = i;
+        <div class="game-info">
+            Your role: <b>@myRole</b>
+        </div>
 
-            <button style="height:100px; font-size:30px;"
-                    @onclick="() => room.Game.Move(index, myRole)">
-                @room.Game.GameBoard[index]
-            </button>
-        }
+        <div class="board">
+            @for (int i = 0; i < 9; i++)
+            {
+                int index = i;
+
+                <button class="cell"
+                        @onclick="() => room.Game.Move(index, myRole)">
+                    @room.Game.GameBoard[index]
+                </button>
+            }
+        </div>
+
+        <div class="game-info">
+            Move: <b>@room.Game.CurrentPlayer</b>
+        </div>
+
+        <div class="game-info">
+            Winner: <b>@room.Game.Winner</b>
+        </div>
+
+        <button class="main-button" @onclick="room.Game.Restart">
+            Restart game
+        </button>
+
     </div>
-
-    <p>Current move: @room.Game.CurrentPlayer</p>
-    <p>Winner: @room.Game.Winner</p>
-
-    <button @onclick="room.Game.Restart">Restart</button>
 }
 
 @code {
