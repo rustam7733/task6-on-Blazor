@@ -1,79 +1,101 @@
-﻿@page "/game"
+﻿@page "/game/{RoomId}"
 @rendermode InteractiveServer
 
-<h1>Counter: Tic Tac Toe</h1>
+@inject NavigationManager Nav
+@inject GameService GameService
+@inject IJSRuntime JS
 
-<div style="display:grid; grid-template-columns:repeat(3,100px); gap:5px;">
-    @for (int i = 0; i < 9; i++)
-    {
-        int index = i;
-        <button style="height:100px; font-size:30px;"
-                @onclick="() => game.Move(index)">
-            @game.GameBoard[index]
-        </button>
-    }
-</div>
+<h1>Tic Tac Toe</h1>
 
-<p class="alert">Move: @game.CurrentPlayer</p>
-<p class="alert">Winner: @game.Winner</p>
+@if (room == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <h3>Your role: @myRole</h3>
 
-<button class="active" @onclick="game.Restart">Restart</button>
+    <div style="display:grid; grid-template-columns:repeat(3,100px); gap:5px;">
+        @for (int i = 0; i < 9; i++)
+        {
+            int index = i;
+
+            <button style="height:100px; font-size:30px;"
+                    @onclick="() => room.Game.Move(index, myRole)">
+                @room.Game.GameBoard[index]
+            </button>
+        }
+    </div>
+
+    <p>Current move: @room.Game.CurrentPlayer</p>
+    <p>Winner: @room.Game.Winner</p>
+
+    <button @onclick="room.Game.Restart">Restart</button>
+}
 
 @code {
-    private TicTacToe game = new();
+    [Parameter]
+    public string RoomId { get; set; } = default!;
 
-    private class TicTacToe
+    GameRoom? room;
+
+    string myRole = "";
+    string myId = "";
+
+    System.Timers.Timer? timer;
+
+    protected override void OnInitialized()
     {
-        public string[] GameBoard { get; set; } = new string[9];
-        public string CurrentPlayer { get; set; } = "X";
-        private bool GameOver { get; set; } = false;
-        public string Winner { get; set; } = "";
-
-        private int[][] winPatterns = [
-            [0,1,2], [3,4,5],[6,7,8],
-            [0,3,6], [1,4,7], [2,5,8],
-            [0,4,8], [2,4,6]
-        ];
-
-        public void Move(int index)
+        if (!GameService.Rooms.TryGetValue(RoomId, out room))
         {
-            if (!string.IsNullOrEmpty(GameBoard[index]) || GameOver)
-                return;
-
-            GameBoard[index] = CurrentPlayer;
-            CheckWinner();
-
-            if (!GameOver)
-                CurrentPlayer = CurrentPlayer == "X" ? "O" : "X";
+            Nav.NavigateTo("/");
         }
+    }
 
-        private void CheckWinner()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        myId = await JS.InvokeAsync<string>("getPlayerId");
+
+        AssignRole();
+
+        timer = new System.Timers.Timer(300);
+        timer.Elapsed += (_, __) => InvokeAsync(StateHasChanged);
+        timer.Start();
+
+        StateHasChanged();
+    }
+
+    void AssignRole()
+    {
+        if (room!.PlayerX == null)
         {
-            foreach (var combo in winPatterns)
-            {
-                if (!string.IsNullOrEmpty(GameBoard[combo[0]])
-                    && GameBoard[combo[0]] == GameBoard[combo[1]]
-                    && GameBoard[combo[1]] == GameBoard[combo[2]])
-                {
-                    Winner = GameBoard[combo[0]];
-                    GameOver = true;
-                    return;
-                }
-            }
-
-            if (GameBoard.All(x => x != null))
-            {
-                Winner = "Draw";
-                GameOver = true;
-            }
+            room.PlayerX = myId;
+            myRole = "X";
         }
-
-        public void Restart()
+        else if (room.PlayerO == null)
         {
-            GameBoard = new string[9];
-            CurrentPlayer = "X";
-            GameOver = false;
-            Winner = "";
+            room.PlayerO = myId;
+            myRole = "O";
         }
+        else if (room.PlayerX == myId)
+        {
+            myRole = "X";
+        }
+        else if (room.PlayerO == myId)
+        {
+            myRole = "O";
+        }
+        else
+        {
+            myRole = "spectator";
+        }
+    }
+
+    public void Dispose()
+    {
+        timer?.Stop();
+        timer?.Dispose();
     }
 }

@@ -1,14 +1,23 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 
+@inject NavigationManager Nav
+@inject GameService GameService
+
 <h1>Lobby</h1>
+
 <button @onclick="CreateLobby">Создать лобби</button>
 
 @code {
-    [Inject] NavigationManager Nav { get; set; } = null!;
-
     void CreateLobby()
     {
-        Nav.NavigateTo("/game");
+        var id = Guid.NewGuid().ToString();
+
+        GameService.Rooms[id] = new GameRoom
+        {
+            Id = id
+        };
+
+        Nav.NavigateTo("/game/" + id);
     }
 }
